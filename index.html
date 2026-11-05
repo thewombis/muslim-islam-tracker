@@ -69,6 +69,20 @@ a{color:var(--teal);text-decoration-thickness:1px;text-underline-offset:3px}
 .est-banner{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#fef3c7;border:1px solid #f59e0b55;color:#78350f;border-radius:10px;padding:8px 10px;font-size:12.5px;margin-bottom:12px}
 @media(prefers-color-scheme:dark){.est-banner{background:#2a2110;color:#fde68a}}
 .map-modes{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.heat-bar{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface2)}
+.heat-bar-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.heat-label{font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:800;color:var(--muted)}
+.heat-toggle{border-color:#b45309}
+.heat-toggle.active{background:#991b1b;color:#fff;border-color:#991b1b}
+.heat-hint{font-size:12.5px;color:var(--muted);max-width:520px;line-height:1.45}
+.heat-modes{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.heat-modes span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--muted)}
+.heat-modes[hidden]{display:none}
+.heat-legend{margin-top:12px}
+.heat-legend[hidden]{display:none}
+.heat-gradient{height:14px;border-radius:999px;background:linear-gradient(90deg,rgba(34,197,94,.15) 0%,rgba(34,197,94,.75) 18%,rgba(163,230,53,.8) 36%,rgba(250,204,21,.9) 58%,rgba(249,115,22,.92) 78%,rgba(220,38,38,.98) 100%);border:1px solid rgba(20,32,28,.18)}
+.heat-scale{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;font-weight:700;margin-top:6px;color:var(--ink)}
+.heat-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin:8px 0 0}
 .nav a{color:var(--ink);text-decoration:none}
 .wrap{max-width:1180px;margin:0 auto;padding:0 18px}
 .hero{padding:28px 0 8px}
@@ -175,7 +189,7 @@ tr:last-child td{border-bottom:0}
 
   <!-- REAL-SHAPE MAP -->
   <section class="section" id="map">
-    <div class="section-head"><div><h2>Graphical map — hover or tap a state</h2><p>Built like the choropleth maps statistical agencies publish: real state outlines at full geographic detail, classed shading in six steps, and every state labeled on the map. <strong>Hover any state</strong> for its headline figure, and read the full readout — rank, estimated population, % of state, mosques, trend, and how it compares with the national share — in the panel under the map. Small Northeastern states are unreadable at national scale on any map, so use the <b>Northeast</b> view button (or scroll / pinch to zoom and drag to pan). <b>Keep zooming and the map keeps going:</b> county outlines and names fade in, the researched hub counties are highlighted, city pins mark the big metros, and at street level the shading fades back so roads and street names show through — try the two street-level view buttons. On a phone, the state picker and the Top 5 chips do the same job as hovering.</p></div></div>
+    <div class="section-head"><div><h2>Graphical map — hover or tap a state</h2><p>Built like the choropleth maps statistical agencies publish: real state outlines at full geographic detail, classed shading in six steps, and every state labeled on the map. <strong>Turn on the Heat map overlay filter</strong> below the shading controls to blend a green → yellow → red glow over the same map — green for lower concentration, yellow for medium, red for the hottest spots — so clusters around New York, Chicago, Detroit, Los Angeles and Houston mesh together visually. Keep it on top of any shading mode and re-weight it by population, % of state, or trend growth. <strong>Hover any state</strong> for its headline figure, and read the full readout — rank, estimated population, % of state, mosques, trend, and how it compares with the national share — in the panel under the map. Small Northeastern states are unreadable at national scale on any map, so use the <b>Northeast</b> view button (or scroll / pinch to zoom and drag to pan). <b>Keep zooming and the map keeps going:</b> county outlines and names fade in, the researched hub counties are highlighted, city pins mark the big metros, and at street level the shading fades back so roads and street names show through — try the two street-level view buttons. On a phone, the state picker and the Top 5 chips do the same job as hovering.</p></div></div>
     <div class="est-banner"><strong>ESTIMATES ONLY</strong><span>All map figures are estimates from public data — there is no official Census count of religion. Sources: Pew Research Center (Sept 2026), 2020 U.S. Religion Census via ARDA, ISPU U.S. Mosque Survey 2020. Full citations in Sources at the bottom.</span></div>
     <div class="card">
       <div class="map-toolbar">
@@ -193,6 +207,26 @@ tr:last-child td{border-bottom:0}
           <button class="vp" data-view="west">West</button>
           <button class="vp" data-view="nyc">NYC — street level</button>
           <button class="vp" data-view="dearborn">Dearborn — street level</button>
+        </div>
+      </div>
+      <div class="heat-bar" id="heatBar">
+        <div class="heat-bar-top">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <span class="heat-label">Overlay filter</span>
+            <button class="pill heat-toggle" id="heatToggle" aria-pressed="false">Heat map — Off</button>
+            <span class="heat-hint" id="heatHint">Blends green → yellow → red over the map so hot spots mesh together at a glance.</span>
+          </div>
+          <div class="heat-modes" id="heatModes" hidden role="group" aria-label="Heat map basis">
+            <span>Heat shows</span>
+            <button class="pill active" data-heatmode="pop">Population</button>
+            <button class="pill" data-heatmode="share">% of state</button>
+            <button class="pill" data-heatmode="trend">Trend growth</button>
+          </div>
+        </div>
+        <div class="heat-legend" id="heatLegend" hidden>
+          <div class="heat-gradient" aria-hidden="true"></div>
+          <div class="heat-scale"><span style="color:#15803d">● Green — lower concentration</span><span style="color:#a16207">● Yellow — medium</span><span style="color:#b91c1c">● Red — hot spot / highest</span></div>
+          <p class="heat-note" id="heatNote">Heat by population: glow is weighted by the metro ranges and state totals already on this page — NYC metro 600–700k, Chicago 400–450k, LA 250–300k, Detroit 200–250k, Houston 150–180k, plus the other top-10 state hubs. Points sit at the metro / hub centers named on the map; the blended glow shows relative density between places, not street-level addresses or a new count.</p>
         </div>
       </div>
       <div class="zoom-guide" aria-label="What appears as you zoom in">
@@ -218,7 +252,7 @@ tr:last-child td{border-bottom:0}
         <select id="statePicker" aria-label="Pick a state to see its statistics"></select>
         <span style="color:var(--muted)">Hovering the map updates the readout below too.</span>
       </div>
-      <p class="map-caption">How this map is drawn: published U.S. state boundary geometry at full resolution over a grayscale base map; classed (stepped) shading, not a smooth gradient, so each color means an exact range in the legend; state labels thin out at national zoom and fill in as you zoom, the same convention reference atlases use. County boundaries (all ~3,100 counties, standard public county geometry) fade in from regional zoom with county names at city zoom; the 15 researched hub counties are outlined in dark teal — hover one for its readout. Keep zooming and the shading fades so the base map's roads and street names take over. <span id="countyNote"></span> <a href="https://www.facebook.com/maps/attribution_terms" target="_blank" rel="noopener">© OpenStreetMap contributors, Map Data Legal Notices</a></p>
+      <p class="map-caption">How this map is drawn: published U.S. state boundary geometry at full resolution over a grayscale base map; classed (stepped) shading, not a smooth gradient, so each color means an exact range in the legend; state labels thin out at national zoom and fill in as you zoom, the same convention reference atlases use. County boundaries (all ~3,100 counties, standard public county geometry) fade in from regional zoom with county names at city zoom; the 15 researched hub counties are outlined in dark teal — hover one for its readout. Keep zooming and the shading fades so the base map's roads and street names take over. When the heat map filter is on, its glow also fades at street level so roads stay readable underneath. <span id="countyNote"></span> <a href="https://www.facebook.com/maps/attribution_terms" target="_blank" rel="noopener">© OpenStreetMap contributors, Map Data Legal Notices</a></p>
     </div>
     <div class="map-detail" id="mapDetail" aria-live="polite" style="margin-top:14px">
       <span class="badge" style="background:#fef3c7;color:#92400e">Estimate — hover a state</span>
@@ -422,6 +456,8 @@ const popRank={}; [...states].sort((a,b)=>b.pop-a.pop).forEach((s,i)=>popRank[s.
 const detail=document.getElementById('mapDetail');
 const picker=document.getElementById('statePicker');
 let mapMode='share';
+let heatEnabled=false;
+let heatMode='pop';
 let currentView='us';
 const VIEWS={
   us:{center:{lat:39.3,lng:-98.5},zoom:null},
@@ -540,6 +576,39 @@ const METRO_PLACES=[
  {label:"Philadelphia",lat:39.9526,lng:-75.1652},
  {label:"Boston",lat:42.3601,lng:-71.0589}
 ];
+/* Heat-map points — metro / hub centers already named on this page.
+   pop = midpoint or hub share of the published metro range / state total used for weighting only;
+   share = that hub's state share (2020 Religion Census); trend = published state mosque growth % (0 = not published). */
+const HEAT_POINTS=[
+ {name:"New York City Metro",lat:40.7128,lng:-74.006,pop:650000,share:3.62,trend:33},
+ {name:"Chicago Metro",lat:41.8781,lng:-87.6298,pop:425000,share:3.71,trend:0},
+ {name:"Los Angeles Metro",lat:34.0522,lng:-118.2437,pop:275000,share:1.28,trend:24},
+ {name:"Detroit / Dearborn",lat:42.3223,lng:-83.1763,pop:225000,share:2.37,trend:0},
+ {name:"North Jersey — Paterson / Jersey City",lat:40.9168,lng:-74.1718,pop:170000,share:3.34,trend:29},
+ {name:"Houston Metro",lat:29.7604,lng:-95.3698,pop:165000,share:1.06,trend:35},
+ {name:"Maryland — D.C. corridor",lat:39.0458,lng:-76.95,pop:188914,share:3.10,trend:0},
+ {name:"Northern Virginia",lat:38.85,lng:-77.29,pop:169371,share:2.00,trend:0},
+ {name:"Philadelphia",lat:39.9526,lng:-75.1652,pop:149561,share:1.15,trend:0},
+ {name:"Boston Metro",lat:42.3601,lng:-71.0589,pop:131749,share:1.90,trend:0},
+ {name:"Bay Area, CA",lat:37.7749,lng:-122.4194,pop:120000,share:1.28,trend:24},
+ {name:"Miami, FL",lat:25.7617,lng:-80.1918,pop:100000,share:1.20,trend:33},
+ {name:"Dallas–Fort Worth, TX",lat:32.7767,lng:-96.797,pop:95000,share:1.06,trend:35},
+ {name:"Minneapolis–St. Paul, MN",lat:44.9778,lng:-93.265,pop:90000,share:2.00,trend:0},
+ {name:"Atlanta Metro, GA",lat:33.749,lng:-84.388,pop:80000,share:1.00,trend:0},
+ {name:"Orange County, CA — Anaheim",lat:33.8366,lng:-117.9143,pop:75000,share:1.28,trend:24},
+ {name:"Orlando, FL",lat:28.5383,lng:-81.3792,pop:65000,share:1.20,trend:33},
+ {name:"Columbus, OH",lat:39.9612,lng:-82.9988,pop:55000,share:1.00,trend:0},
+ {name:"Rochester / Buffalo, NY",lat:43.1566,lng:-77.6088,pop:50000,share:3.62,trend:33},
+ {name:"San Diego, CA",lat:32.7157,lng:-117.1611,pop:45000,share:1.28,trend:24}
+];
+function heatWeightFor(p){
+  if(heatMode==='share') return Math.max(0.14, Math.min(1, p.share/3.71));
+  if(heatMode==='trend') return p.trend>0 ? Math.max(0.35, Math.min(1, p.trend/35)) : 0.14;
+  return Math.max(0.12, Math.min(1, p.pop/650000));
+}
+function buildHeatData(){
+  return {type:'FeatureCollection', features:HEAT_POINTS.map(p=>({type:'Feature', geometry:{type:'Point', coordinates:[p.lng,p.lat]}, properties:{name:p.name, weight:heatWeightFor(p)}}))};
+}
 let lastHovered='';
 function showCountyDetail(key){
   const h=HUB_COUNTIES[key]; if(!h) return;
@@ -679,6 +748,21 @@ async function mountRealMap(){
       ]
     });
   }
+  if(heatEnabled){
+    overlays.push({
+      id:'heatmap', data:buildHeatData(),
+      layers:[{
+        id:'heatmap-density', type:'heatmap', source:'heatmap',
+        paint:{
+          'heatmap-weight':['interpolate',['linear'],['get','weight'],0,0,1,1],
+          'heatmap-intensity':['interpolate',['linear'],['zoom'],3,1.05,7,2.1,11,2.7],
+          'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba(34,197,94,0)',0.15,'rgba(34,197,94,0.55)',0.35,'rgba(163,230,53,0.66)',0.55,'rgba(250,204,21,0.78)',0.75,'rgba(249,115,22,0.88)',1,'rgba(220,38,38,0.96)'],
+          'heatmap-radius':['interpolate',['linear'],['zoom'],3,30,5,44,7,56,10,72,13,84],
+          'heatmap-opacity':['interpolate',['linear'],['zoom'],3,0.84,10,0.8,13,0.48]
+        }
+      }]
+    });
+  }
   let handle=null;
   try{
     handle=MapHelpers.mountMap(el,{
@@ -700,6 +784,29 @@ document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('clic
   document.querySelectorAll('[data-view]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); currentView=btn.dataset.view;
   mountRealMap();
 }));
+const HEAT_NOTES={
+  pop:'Heat by population: glow is weighted by the metro ranges and state totals already on this page — NYC metro 600–700k, Chicago 400–450k, LA 250–300k, Detroit 200–250k, Houston 150–180k, plus the other top-10 state hubs. Points sit at the metro / hub centers named on the map; the blended glow shows relative density between places, not street-level addresses or a new count.',
+  share:'Heat by % of state: the same hub points, re-weighted by each hub\u2019s state share (2020 Religion Census) — Illinois 3.71%, New York 3.62%, New Jersey 3.34% and Maryland 3.10% glow hottest even where their totals are smaller than California\u2019s or Texas\u2019s. This answers “where is the share highest?” rather than “where are the most people?”',
+  trend:'Heat by trend growth: glow is weighted by the published state mosque-growth rate 2010 → 2020 (ISPU) — Texas +35%, New York and Florida +33%, New Jersey +29%, California +24%. Hubs in states with no published rate keep only a faint green glow (0.14 weight) — that means “not published,” not flat and not decreasing.'
+};
+function syncHeatUI(){
+  const t=document.getElementById('heatToggle');
+  const modes=document.getElementById('heatModes');
+  const legend=document.getElementById('heatLegend');
+  const hint=document.getElementById('heatHint');
+  const note=document.getElementById('heatNote');
+  if(t){ t.classList.toggle('active', heatEnabled); t.setAttribute('aria-pressed', heatEnabled?'true':'false'); t.textContent=heatEnabled?'Heat map — On':'Heat map — Off'; }
+  if(modes) modes.hidden=!heatEnabled;
+  if(legend) legend.hidden=!heatEnabled;
+  if(hint) hint.textContent=heatEnabled?'On — hot spots glow red, medium areas yellow, lower areas green, all fading and meshing together over the shading below.':'Blends green → yellow → red over the map so hot spots mesh together at a glance.';
+  if(note) note.textContent=HEAT_NOTES[heatMode]||HEAT_NOTES.pop;
+}
+const heatToggleBtn=document.getElementById('heatToggle');
+if(heatToggleBtn) heatToggleBtn.addEventListener('click',()=>{ heatEnabled=!heatEnabled; syncHeatUI(); mountRealMap(); });
+document.querySelectorAll('[data-heatmode]').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('[data-heatmode]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); heatMode=btn.dataset.heatmode; syncHeatUI(); if(heatEnabled) mountRealMap();
+}));
+syncHeatUI();
 renderLegend();
 mountRealMap();
 
